@@ -23,3 +23,21 @@ variable "private_endpoint_network_policies" {
   type        = string
   default     = "Disabled"
 }
+
+variable "delegation_name" {
+  description = "Optional delegation block name"
+  type        = string
+  default     = null
+}
+
+variable "service_delegation_name" {
+  description = "Optional service delegation name"
+  type        = string
+  default     = null
+}
+
+variable "service_delegation_actions" {
+  description = "Actions for service delegation"
+  type        = list(string)
+  default     = []
+}
