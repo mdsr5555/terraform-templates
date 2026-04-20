@@ -24,6 +24,12 @@ variable "https_only" {
   default     = true
 }
 
+variable "virtual_network_subnet_id" {
+  description = "Subnet ID for App Service VNet Integration"
+  type        = string
+  default     = null
+}
+
 variable "always_on" {
   description = "Enable always on"
   type        = bool
