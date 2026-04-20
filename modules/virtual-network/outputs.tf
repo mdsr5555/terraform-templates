@@ -1,7 +1,14 @@
-output "name" {
-  value = azurerm_resource_group.rg.name
+output "id" {
+  description = "ID of the virtual network"
+  value       = azurerm_virtual_network.vnet.id
 }
 
-output "location" {
-  value = azurerm_resource_group.rg.location
+output "name" {
+  description = "Name of the virtual network"
+  value       = azurerm_virtual_network.vnet.name
+}
+
+output "address_space" {
+  description = "Address space of the virtual network"
+  value       = azurerm_virtual_network.vnet.address_space
 }
