@@ -1,57 +1,118 @@
-resource "azurerm_cdn_frontdoor_profile" "this" {
-  name                = var.name
+resource "azurerm_public_ip" "this" {
+  name                = var.public_ip_name
   resource_group_name = var.resource_group_name
-  sku_name            = "Standard_AzureFrontDoor"
+  location            = var.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
   tags                = var.tags
 }
 
-resource "azurerm_cdn_frontdoor_endpoint" "this" {
-  name                     = var.endpoint_name
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-}
+resource "azurerm_application_gateway" "this" {
+  name                = var.name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
 
-resource "azurerm_cdn_frontdoor_origin_group" "this" {
-  name                     = var.origin_group_name
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-
-  session_affinity_enabled = false
-
-  load_balancing {
-    sample_size                 = 4
-    successful_samples_required = 3
+  sku {
+    name     = var.sku_name
+    tier     = var.sku_tier
+    capacity = var.capacity
   }
 
-  health_probe {
-    interval_in_seconds = 120
-    path                = "/health"
-    protocol            = "Https"
-    request_type        = "GET"
+  gateway_ip_configuration {
+    name      = "gateway-ip-config"
+    subnet_id = var.subnet_id
   }
-}
 
-resource "azurerm_cdn_frontdoor_origin" "this" {
-  name                          = var.origin_name
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this.id
+  frontend_port {
+    name = "frontend-port-80"
+    port = 80
+  }
 
-  host_name                      = var.origin_host_name
-  origin_host_header             = var.origin_host_name
-  http_port                      = 80
-  https_port                     = 443
-  enabled                        = true
-  priority                       = 1
-  weight                         = 1000
-  certificate_name_check_enabled = true
-}
+  frontend_port {
+    name = "frontend-port-443"
+    port = 443
+  }
 
-resource "azurerm_cdn_frontdoor_route" "this" {
-  name                          = var.route_name
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this.id]
+  frontend_ip_configuration {
+    name                 = "frontend-ip-config"
+    public_ip_address_id = azurerm_public_ip.this.id
+  }
 
-  patterns_to_match      = ["/*"]
-  supported_protocols    = ["Http", "Https"]
-  forwarding_protocol    = "HttpsOnly"
-  https_redirect_enabled = true
-  link_to_default_domain = true
+  backend_address_pool {
+    name  = "backend-pool"
+    fqdns = [var.backend_fqdn]
+  }
+
+  backend_http_settings {
+    name                                = "backend-https-settings"
+    cookie_based_affinity               = "Disabled"
+    port                                = 443
+    protocol                            = "Https"
+    request_timeout                     = 30
+    probe_name                          = "health-probe"
+    host_name                           = var.backend_fqdn
+    pick_host_name_from_backend_address = false
+  }
+
+  probe {
+    name                                      = "health-probe"
+    protocol                                  = "Https"
+    path                                      = var.health_probe_path
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
+    host                                      = var.backend_fqdn
+    pick_host_name_from_backend_http_settings = false
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  http_listener {
+    name                           = "http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name             = "frontend-port-80"
+    protocol                       = "Http"
+  }
+
+  http_listener {
+    name                           = "https-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name             = "frontend-port-443"
+    protocol                       = "Https"
+    ssl_certificate_name           = var.ssl_certificate_name
+  }
+
+  ssl_certificate {
+    name     = var.ssl_certificate_name
+    data     = var.ssl_certificate_data
+    password = var.ssl_certificate_password
+  }
+
+  redirect_configuration {
+    name                 = "http-to-https-redirect"
+    redirect_type        = "Permanent"
+    target_listener_name = "https-listener"
+    include_path         = true
+    include_query_string = true
+  }
+
+  request_routing_rule {
+    name                        = "http-redirect-rule"
+    rule_type                   = "Basic"
+    http_listener_name          = "http-listener"
+    redirect_configuration_name = "http-to-https-redirect"
+    priority                    = 100
+  }
+
+  request_routing_rule {
+    name                       = "https-routing-rule"
+    rule_type                  = "Basic"
+    http_listener_name         = "https-listener"
+    backend_address_pool_name  = "backend-pool"
+    backend_http_settings_name = "backend-https-settings"
+    priority                   = 110
+  }
 }

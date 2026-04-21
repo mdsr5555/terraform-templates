@@ -24,7 +24,7 @@ variable "subnet_id" {
 }
 
 variable "backend_fqdn" {
-  description = "Backend FQDN, for example App Service default hostname"
+  description = "Backend FQDN, usually the App Service default hostname"
   type        = string
 }
 
@@ -47,24 +47,24 @@ variable "sku_tier" {
 }
 
 variable "capacity" {
-  description = "Instance capacity"
+  description = "Application Gateway instance count"
   type        = number
   default     = 1
 }
 
 variable "ssl_certificate_name" {
-  description = "SSL certificate name in Application Gateway"
+  description = "SSL certificate name"
   type        = string
 }
 
 variable "ssl_certificate_data" {
-  description = "Base64-encoded PFX certificate data"
+  description = "Base64 encoded PFX certificate content"
   type        = string
   sensitive   = true
 }
 
 variable "ssl_certificate_password" {
-  description = "Password for the PFX certificate"
+  description = "PFX certificate password"
   type        = string
   sensitive   = true
 }
