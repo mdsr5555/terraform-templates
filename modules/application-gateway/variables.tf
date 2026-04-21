@@ -37,13 +37,13 @@ variable "health_probe_path" {
 variable "sku_name" {
   description = "Application Gateway SKU name"
   type        = string
-  default     = "Standard_v2"
+  default     = "WAF_v2" // use 'Standard_v2' if you don't want WAF included
 }
 
 variable "sku_tier" {
   description = "Application Gateway SKU tier"
   type        = string
-  default     = "Standard_v2"
+  default     = "WAF_v2" // use 'Standard_v2' if you don't want WAF included
 }
 
 variable "capacity" {
@@ -73,4 +73,42 @@ variable "tags" {
   description = "Tags"
   type        = map(string)
   default     = {}
+}
+
+
+// variables for WAF
+variable "waf_enabled" {
+  description = "Enable WAF on Application Gateway"
+  type        = bool
+  default     = true
+}
+
+variable "waf_firewall_mode" {
+  description = "WAF mode: Detection or Prevention"
+  type        = string
+  default     = "Detection"
+}
+
+variable "waf_rule_set_type" {
+  description = "WAF rule set type"
+  type        = string
+  default     = "OWASP"
+}
+
+variable "waf_rule_set_version" {
+  description = "WAF rule set version"
+  type        = string
+  default     = "3.2"
+}
+
+variable "waf_file_upload_limit_mb" {
+  description = "WAF file upload limit in MB"
+  type        = number
+  default     = 100
+}
+
+variable "waf_max_request_body_size_kb" {
+  description = "WAF max request body size in KB"
+  type        = number
+  default     = 128
 }

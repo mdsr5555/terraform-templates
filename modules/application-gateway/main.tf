@@ -25,6 +25,15 @@ resource "azurerm_application_gateway" "this" {
     min_protocol_version = "TLSv1_2"
   }
 
+  waf_configuration {
+    enabled                  = var.waf_enabled
+    firewall_mode            = var.waf_firewall_mode
+    rule_set_type            = var.waf_rule_set_type
+    rule_set_version         = var.waf_rule_set_version
+    file_upload_limit_mb     = var.waf_file_upload_limit_mb
+    max_request_body_size_kb = var.waf_max_request_body_size_kb
+  }
+
   gateway_ip_configuration {
     name      = "gateway-ip-config"
     subnet_id = var.subnet_id
