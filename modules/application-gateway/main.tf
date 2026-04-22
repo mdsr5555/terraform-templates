@@ -7,6 +7,29 @@ resource "azurerm_public_ip" "this" {
   tags                = var.tags
 }
 
+resource "azurerm_web_application_firewall_policy" "this" {
+  count               = var.waf_enabled ? 1 : 0
+  name                = var.waf_policy_name != null ? var.waf_policy_name : "${var.name}-waf-policy"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  policy_settings {
+    enabled                     = true
+    mode                        = var.waf_firewall_mode
+    file_upload_limit_in_mb     = var.waf_file_upload_limit_mb
+    max_request_body_size_in_kb = var.waf_max_request_body_size_kb
+    request_body_check          = true
+  }
+
+  managed_rules {
+    managed_rule_set {
+      type    = var.waf_rule_set_type
+      version = var.waf_rule_set_version
+    }
+  }
+}
+
 resource "azurerm_application_gateway" "this" {
   name                = var.name
   resource_group_name = var.resource_group_name
@@ -25,14 +48,7 @@ resource "azurerm_application_gateway" "this" {
     min_protocol_version = "TLSv1_2"
   }
 
-  waf_configuration {
-    enabled                  = var.waf_enabled
-    firewall_mode            = var.waf_firewall_mode
-    rule_set_type            = var.waf_rule_set_type
-    rule_set_version         = var.waf_rule_set_version
-    file_upload_limit_mb     = var.waf_file_upload_limit_mb
-    max_request_body_size_kb = var.waf_max_request_body_size_kb
-  }
+  firewall_policy_id = var.waf_enabled ? azurerm_web_application_firewall_policy.this[0].id : null
 
   gateway_ip_configuration {
     name      = "gateway-ip-config"

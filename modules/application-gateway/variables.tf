@@ -83,6 +83,12 @@ variable "waf_enabled" {
   default     = true
 }
 
+variable "waf_policy_name" {
+  description = "WAF policy name"
+  type        = string
+  default     = null
+}
+
 variable "waf_firewall_mode" {
   description = "WAF mode: Detection or Prevention"
   type        = string
