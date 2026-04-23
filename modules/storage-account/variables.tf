@@ -58,7 +58,7 @@ variable "tags" {
 variable "shared_access_key_enabled" {
   description = "Enable shared access key auth"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "blob_delete_retention_days" {
