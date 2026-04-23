@@ -54,3 +54,21 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "shared_access_key_enabled" {
+  description = "Enable shared access key auth"
+  type        = bool
+  default     = false
+}
+
+variable "blob_delete_retention_days" {
+  description = "Blob soft delete retention"
+  type        = number
+  default     = 7
+}
+
+variable "container_delete_retention_days" {
+  description = "Container soft delete retention"
+  type        = number
+  default     = 7
+}

@@ -30,11 +30,11 @@ variable "virtual_network_subnet_id" {
   default     = null
 }
 
-variable "always_on" {
-  description = "Enable always on"
-  type        = bool
-  default     = false
-}
+# variable "always_on" {
+#   description = "Enable always on"
+#   type        = bool
+#   default     = false
+# }
 
 variable "dotnet_version" {
   description = "Dotnet version for the Linux Web App"
@@ -52,4 +52,34 @@ variable "tags" {
   description = "Tags to apply to the Linux Web App"
   type        = map(string)
   default     = {}
+}
+
+variable "always_on" {
+  description = "Keep app always on"
+  type        = bool
+  default     = true
+}
+
+variable "health_check_path" {
+  description = "Health check path"
+  type        = string
+  default     = "/health"
+}
+
+variable "ftps_state" {
+  description = "FTPS state"
+  type        = string
+  default     = "Disabled"
+}
+
+variable "http2_enabled" {
+  description = "Enable HTTP/2"
+  type        = bool
+  default     = true
+}
+
+variable "managed_identity_enabled" {
+  description = "Enable system-assigned managed identity"
+  type        = bool
+  default     = true
 }
