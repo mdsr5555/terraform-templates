@@ -42,6 +42,15 @@ resource "azurerm_application_gateway" "this" {
     capacity = var.capacity
   }
 
+  dynamic "identity" {
+    for_each = length(var.identity_ids) > 0 ? [1] : []
+
+    content {
+      type         = "UserAssigned"
+      identity_ids = var.identity_ids
+    }
+  }
+
   ssl_policy {
     policy_type          = "Predefined"
     policy_name          = "AppGwSslPolicy20220101"
@@ -116,11 +125,19 @@ resource "azurerm_application_gateway" "this" {
     ssl_certificate_name           = var.ssl_certificate_name
   }
 
+  # ssl_certificate {
+  #   name     = var.ssl_certificate_name
+  #   data     = var.ssl_certificate_data
+  #   password = var.ssl_certificate_password
+  # }
+
   ssl_certificate {
-    name     = var.ssl_certificate_name
-    data     = var.ssl_certificate_data
-    password = var.ssl_certificate_password
+    name                = var.ssl_certificate_name
+    data                = var.key_vault_secret_id == null ? var.ssl_certificate_data : null
+    password            = var.key_vault_secret_id == null ? var.ssl_certificate_password : null
+    key_vault_secret_id = var.key_vault_secret_id
   }
+
 
   redirect_configuration {
     name                 = "http-to-https-redirect"

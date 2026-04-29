@@ -118,3 +118,15 @@ variable "waf_max_request_body_size_kb" {
   type        = number
   default     = 128
 }
+
+variable "identity_ids" {
+  description = "User assigned identity IDs for Application Gateway."
+  type        = list(string)
+  default     = []
+}
+
+variable "key_vault_secret_id" {
+  description = "Key Vault certificate secret ID for Application Gateway TLS."
+  type        = string
+  default     = null
+}
