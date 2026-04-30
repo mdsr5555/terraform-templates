@@ -42,6 +42,13 @@ variable "security_rules" {
   default = []
 }
 
+variable "associate_subnet" {
+  description = "Whether to associate this NSG with a subnet."
+  type        = bool
+  default     = false
+}
+
+
 variable "tags" {
   description = "Resource tags."
   type        = map(string)
